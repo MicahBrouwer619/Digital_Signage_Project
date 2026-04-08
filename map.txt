@@ -1,0 +1,10 @@
+signage/
+├── server/
+│   ├── index.js          # Express server
+│   ├── routes/
+│   │   └── content.js    # API routes
+│   └── uploads/          # Stored images/videos
+├── player/
+│   └── index.html        # Runs fullscreen on the Pi
+└── dashboard/
+    └── index.html        # Management UI

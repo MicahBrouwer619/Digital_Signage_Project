@@ -1,0 +1,31 @@
+{
+  "test": {
+    "id": "test",
+    "name": "Test",
+    "playlist": [
+      {
+        "id": 1774891734808,
+        "filename": "1774891697370-sunset_8_3_0.jpg",
+        "originalName": "sunset_8_3_0.jpg",
+        "type": "image",
+        "url": "/uploads/1774891697370-sunset_8_3_0.jpg",
+        "duration": 5
+      },
+      {
+        "id": 1775066202454,
+        "filename": "1774631833237-test2.jpg",
+        "originalName": "test2.jpg",
+        "type": "image",
+        "url": "/uploads/1774631833237-test2.jpg",
+        "duration": 10
+      }
+    ],
+    "active": false
+  },
+  "lobby": {
+    "id": "lobby",
+    "name": "lobby",
+    "playlist": [],
+    "active": true
+  }
+}

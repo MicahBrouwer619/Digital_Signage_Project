@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1774634481272,
+    "filename": "1774634481256-test2.jpg",
+    "originalName": "test2.jpg",
+    "type": "image",
+    "url": "/uploads/1774634481256-test2.jpg",
+    "duration": 1
+  },
+  {
+    "id": 1774634473261,
+    "filename": "1774634473255-test.jpg",
+    "originalName": "test.jpg",
+    "type": "image",
+    "url": "/uploads/1774634473255-test.jpg",
+    "duration": 1
+  },
+  {
+    "id": 1774634508716,
+    "filename": "1774634508713-test.jpg",
+    "originalName": "test.jpg",
+    "type": "image",
+    "url": "/uploads/1774634508713-test.jpg",
+    "duration": 1
+  },
+  {
+    "id": 1774634477699,
+    "filename": "1774634477681-test2.jpg",
+    "originalName": "test2.jpg",
+    "type": "image",
+    "url": "/uploads/1774634477681-test2.jpg",
+    "duration": 1
+  }
+]
