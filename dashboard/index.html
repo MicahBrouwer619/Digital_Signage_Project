@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Signage Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1a2e;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 { font-size: 1.3rem; font-weight: 600; }
+    header span { font-size: 0.85rem; opacity: 0.6; }
+
+    .layout { display: flex; flex: 1; }
+
+    .sidebar {
+      width: 240px;
+      background: #1e1e2e;
+      color: #ccc;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .sidebar h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #666;
+      margin-bottom: 0.25rem;
+    }
+
+    .screen-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      background: none;
+      border: none;
+      color: #ccc;
+      width: 100%;
+      text-align: left;
+      transition: background 0.15s;
+    }
+
+    .screen-btn:hover { background: #2a2a3e; }
+    .screen-btn.active { background: #4f46e5; color: white; }
+
+    .screen-btn .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #444;
+      flex-shrink: 0;
+    }
+
+    .screen-btn .dot.online { background: #22c55e; }
+    .screen-name { flex: 1; margin: 0 0.5rem; }
+
+    .delete-screen-btn {
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0 0.2rem;
+      line-height: 1;
+    }
+
+    .delete-screen-btn:hover { color: #f87171; }
+
+    .add-screen {
+      margin-top: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .add-screen input {
+      flex: 1;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background: #2a2a3e;
+      color: white;
+      font-size: 0.85rem;
+    }
+
+    .add-screen button {
+      padding: 0.4rem 0.7rem;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .main { flex: 1; padding: 1.5rem; overflow-y: auto; }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      font-size: 0.85rem;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .no-screen {
+      color: #aaa;
+      text-align: center;
+      padding: 4rem;
+      font-size: 1rem;
+    }
+
+    .upload-area {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      margin-bottom: 0.75rem;
+    }
+
+    .upload-area:hover { border-color: #4f46e5; }
+    .upload-area p { color: #888; font-size: 0.9rem; }
+    input[type="file"] { display: none; }
+
+    .row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    label { font-size: 0.9rem; color: #555; }
+
+    input[type="number"] {
+      width: 80px;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    button {
+      padding: 0.5rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .btn-primary { background: #4f46e5; color: white; }
+    .btn-primary:hover { background: #4338ca; }
+    .btn-primary:disabled { background: #a5b4fc; cursor: not-allowed; }
+    .btn-danger { background: #fee2e2; color: #dc2626; font-size: 0.8rem; padding: 0.3rem 0.7rem; }
+    .btn-danger:hover { background: #fecaca; }
+    .btn-secondary { background: #f0f0f0; color: #333; }
+    .btn-secondary:hover { background: #e0e0e0; }
+
+    .status { font-size: 0.85rem; color: #16a34a; margin-top: 0.5rem; min-height: 1.2em; }
+
+    .playlist { list-style: none; }
+
+    .playlist li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .playlist li:last-child { border-bottom: none; }
+
+    .drag-handle { cursor: grab; font-size: 1.1rem; color: #ccc; user-select: none; }
+
+    .thumb {
+      width: 80px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .thumb-video {
+      width: 80px;
+      height: 50px;
+      border-radius: 4px;
+      background: #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .item-info { flex: 1; }
+    .item-info strong { display: block; font-size: 0.9rem; }
+    .item-info span { font-size: 0.8rem; color: #888; }
+    .empty { color: #aaa; font-size: 0.9rem; text-align: center; padding: 2rem 0; }
+    li.drag-over { border-top: 2px solid #4f46e5 !important; }
+
+    .add-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .add-modal-backdrop.open { display: flex; }
+
+    .add-modal {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 500px;
+      max-width: 95vw;
+    }
+
+    .add-modal h3 { margin-bottom: 1rem; font-size: 1rem; }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 0.6rem;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+    }
+
+    .modal-item {
+      border: 2px solid #eee;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .modal-item:hover, .modal-item.selected { border-color: #4f46e5; }
+
+    .modal-item img, .modal-item .vid-thumb {
+      width: 100%;
+      height: 70px;
+      object-fit: cover;
+      display: block;
+      background: #1a1a2e;
+    }
+
+    .vid-thumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: white;
+    }
+
+    .modal-item-name {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #555;
+    }
+
+    .modal-footer { display: flex; gap: 0.75rem; align-items: center; justify-content: flex-end; }
+    .modal-footer label { font-size: 0.9rem; color: #555; }
+
+    .screen-url {
+      font-size: 0.75rem;
+      color: #888;
+      margin-top: 0.25rem;
+      font-family: monospace;
+    }
+
+    .toggle {
+      width: 44px;
+      height: 24px;
+      border-radius: 12px;
+      background: #ddd;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .toggle.on { background: #4f46e5; }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: white;
+      top: 3px;
+      left: 3px;
+      transition: left 0.2s;
+    }
+
+    .toggle.on::after { left: 23px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📺 Signage Dashboard</h1>
+    <span>Multi-screen management</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <div class="sidebar">
+    <h2>Screens</h2>
+    <div id="screenList"></div>
+    <div class="add-screen">
+      <input type="text" id="newScreenName" placeholder="Screen name" />
+      <button onclick="createScreen()">+</button>
+    </div>
+  </div>
+
+  <div class="main" id="mainPanel">
+    <div class="no-screen">← Create or select a screen to get started</div>
+  </div>
+
+</div>
+
+<!-- Add content modal -->
+<div class="add-modal-backdrop" id="addModal">
+  <div class="add-modal">
+    <h3>Add content to playlist</h3>
+    <div class="modal-grid" id="modalGrid"></div>
+    <div class="modal-footer">
+      <label>Duration (s): <input type="number" id="modalDuration" value="10" min="1" max="300" style="width:70px; margin-left:0.3rem;" /></label>
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="confirmAddToPlaylist()">Add to Playlist</button>
+    </div>
+  </div>
+</div>
+
+<script src="http://localhost:3000/socket.io/socket.io.js"></script>
+<script>
+  const socket = io('http://localhost:3000');
+
+  let screens = {};
+  let library = [];
+  let settings = {};
+  let activeScreenId = null;
+  let selectedFile = null;
+  let dragSrcId = null;
+  let modalSelectedFilename = null;
+
+  // --- Init (single, correct version) ---
+  async function init() {
+    const [screensRes, libraryRes, settingsRes] = await Promise.all([
+      fetch('http://localhost:3000/api/screens'),
+      fetch('http://localhost:3000/api/library'),
+      fetch('http://localhost:3000/api/settings')
+    ]);
+    const screenList = await screensRes.json();
+    library = await libraryRes.json();
+    settings = await settingsRes.json();
+    screenList.forEach(s => screens[s.id] = s);
+    renderSidebar();
+  }
+
+  // --- Socket events ---
+  socket.on('screens-updated', (list) => {
+    list.forEach(s => screens[s.id] = { ...screens[s.id], ...s });
+    renderSidebar();
+  });
+
+  socket.on('screen-status', ({ screenId, online }) => {
+    if (screens[screenId]) {
+      screens[screenId].online = online;
+      renderSidebar();
+    }
+  });
+
+  socket.on('playlist-updated', (playlist) => {
+    if (screens[activeScreenId]) {
+      screens[activeScreenId].playlist = playlist;
+      renderPlaylist(playlist);
+    }
+  });
+
+  socket.on('settings-updated', (newSettings) => {
+    settings = newSettings;
+  });
+
+  // --- Sidebar ---
+  function renderSidebar() {
+    const el = document.getElementById('screenList');
+    const list = Object.values(screens);
+    if (!list.length) {
+      el.innerHTML = '<div style="font-size:0.8rem;color:#555;padding:0.5rem 0">No screens yet</div>';
+      return;
+    }
+    el.innerHTML = list.map(s => `
+      <button class="screen-btn ${s.id === activeScreenId ? 'active' : ''}" onclick="selectScreen('${s.id}')">
+        <span class="dot ${s.online ? 'online' : ''}"></span>
+        <span class="screen-name">${s.name}</span>
+        <span class="delete-screen-btn" onclick="deleteScreen(event, '${s.id}')">✕</span>
+      </button>
+    `).join('');
+  }
+
+  async function createScreen() {
+    const input = document.getElementById('newScreenName');
+    const name = input.value.trim();
+    if (!name) return;
+    const res = await fetch('http://localhost:3000/api/screens', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+    const screen = await res.json();
+    if (screen.error) return alert(screen.error);
+    screens[screen.id] = screen;
+    input.value = '';
+    renderSidebar();
+    selectScreen(screen.id);
+  }
+
+  async function deleteScreen(e, id) {
+    e.stopPropagation();
+    if (!confirm(`Delete screen "${screens[id]?.name}"?`)) return;
+    await fetch(`http://localhost:3000/api/screens/${id}`, { method: 'DELETE' });
+    delete screens[id];
+    if (activeScreenId === id) {
+      activeScreenId = null;
+      document.getElementById('mainPanel').innerHTML = '<div class="no-screen">← Create or select a screen to get started</div>';
+    }
+    renderSidebar();
+  }
+
+  // --- Screen panel ---
+  async function selectScreen(id) {
+    activeScreenId = id;
+    renderSidebar();
+    const res = await fetch(`http://localhost:3000/api/screens/${id}/playlist`);
+    const playlist = await res.json();
+    screens[id].playlist = playlist;
+    renderMainPanel();
+  }
+
+  function renderMainPanel() {
+    const screen = screens[activeScreenId];
+    const playerUrl = `http://localhost:3000/player?screen=${screen.id}`;
+
+    document.getElementById('mainPanel').innerHTML = `
+      <div class="card" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+        <div>
+          <h2 style="margin-bottom:0.25rem;">Screen — ${screen.name}</h2>
+          <div class="screen-url">Player URL: ${playerUrl}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+          <span style="font-size:0.9rem; color:#555;" id="toggle-label-${screen.id}">Screen ${screen.active !== false ? 'On' : 'Off'}</span>
+          <div class="toggle ${screen.active !== false ? 'on' : ''}" onclick="toggleScreen('${screen.id}')" id="toggle-${screen.id}"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Default / Offline Image</h2>
+        <p style="font-size:0.85rem;color:#888;margin-bottom:0.75rem;">Shown on any screen that is toggled off or has no content.</p>
+        ${settings.defaultImageUrl
+      ? settings.defaultImageType === 'video'
+        ? `<video src="http://localhost:3000${settings.defaultImageUrl}" autoplay loop muted playsinline style="height:80px;border-radius:6px;margin-bottom:0.75rem;display:block;"></video>`
+        : `<img src="http://localhost:3000${settings.defaultImageUrl}" style="height:80px;border-radius:6px;margin-bottom:0.75rem;display:block;" />`
+  : `<p style="font-size:0.85rem;color:#aaa;margin-bottom:0.75rem;">No default image set.</p>`}
+        <div class="row">
+          <button class="btn-primary" onclick="document.getElementById('defaultImageInput').click()">
+            ${settings.defaultImageUrl ? 'Change Image' : 'Upload Image'}
+          </button>
+          <input type="file" id="defaultImageInput" accept="image/*,video/*" style="display:none" onchange="uploadDefaultImage(event)" />
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Upload to Library</h2>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+          <p>Click to upload an image or video to the shared library</p>
+          <p id="selectedFileName" style="color:#4f46e5;font-weight:500;margin-top:0.5rem;"></p>
+        </div>
+        <input type="file" id="fileInput" accept="image/*,video/*" onchange="onFileSelected(event)" />
+        <div class="row">
+          <button class="btn-primary" id="uploadBtn" onclick="uploadFile()" disabled>Upload to Library</button>
+        </div>
+        <div class="status" id="uploadStatus"></div>
+      </div>
+
+      <div class="card">
+        <h2>Playlist</h2>
+        <button class="btn-primary" style="margin-bottom:1rem;" onclick="openModal()">+ Add from Library</button>
+        <ul class="playlist" id="playlist"></ul>
+      </div>
+    `;
+
+    renderPlaylist(screen.playlist);
+  }
+
+  // --- Toggle ---
+  async function toggleScreen(id) {
+    const res = await fetch(`http://localhost:3000/api/screens/${id}/toggle`, { method: 'POST' });
+    const { active } = await res.json();
+    screens[id].active = active;
+
+    const toggle = document.getElementById(`toggle-${id}`);
+    const label = document.getElementById(`toggle-label-${id}`);
+    if (toggle) toggle.classList.toggle('on', active);
+    if (label) label.textContent = `Screen ${active ? 'On' : 'Off'}`;
+  }
+
+  // --- Default image upload ---
+  async function uploadDefaultImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch('http://localhost:3000/api/settings/default-image', {
+      method: 'POST',
+      body: formData
+    });
+    settings = await res.json();
+    renderMainPanel();
+  }
+
+  // --- Library upload ---
+  function onFileSelected(event) {
+    selectedFile = event.target.files[0];
+    document.getElementById('selectedFileName').textContent = selectedFile?.name || '';
+    document.getElementById('uploadBtn').disabled = !selectedFile;
+  }
+
+  async function uploadFile() {
+    if (!selectedFile) return;
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    const btn = document.getElementById('uploadBtn');
+    const status = document.getElementById('uploadStatus');
+    btn.disabled = true;
+    status.textContent = 'Uploading...';
+
+    try {
+      const res = await fetch('http://localhost:3000/api/library/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const item = await res.json();
+      library.push(item);
+      status.textContent = `✅ "${item.originalName}" added to library!`;
+      selectedFile = null;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('selectedFileName').textContent = '';
+      btn.disabled = false;
+    } catch (err) {
+      status.textContent = '❌ Upload failed.';
+      btn.disabled = false;
+    }
+  }
+
+  // --- Modal ---
+  function openModal() {
+    modalSelectedFilename = null;
+    const grid = document.getElementById('modalGrid');
+    if (!library.length) {
+      grid.innerHTML = '<p style="color:#aaa;font-size:0.9rem;">No files in library yet. Upload something first.</p>';
+    } else {
+      grid.innerHTML = library.map(item => `
+        <div class="modal-item" data-filename="${item.filename}" onclick="selectModalItem(this, '${item.filename}')">
+          ${item.type === 'image'
+            ? `<img src="http://localhost:3000${item.url}" />`
+            : `<div class="vid-thumb">▶</div>`}
+          <div class="modal-item-name">${item.filename.substring(item.filename.indexOf('-') + 1)}</div>
+        </div>
+      `).join('');
+    }
+    document.getElementById('addModal').classList.add('open');
+  }
+
+  function selectModalItem(el, filename) {
+    document.querySelectorAll('.modal-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    modalSelectedFilename = filename;
+  }
+
+  function closeModal() {
+    document.getElementById('addModal').classList.remove('open');
+    modalSelectedFilename = null;
+  }
+
+  async function confirmAddToPlaylist() {
+    if (!modalSelectedFilename) return alert('Please select a file.');
+    const libItem = library.find(l => l.filename === modalSelectedFilename);
+    const duration = parseInt(document.getElementById('modalDuration').value) || 10;
+
+    const res = await fetch(`http://localhost:3000/api/screens/${activeScreenId}/playlist`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...libItem, originalName: libItem.filename.substring(libItem.filename.indexOf('-') + 1), duration })
+    });
+    const newItem = await res.json();
+
+    screens[activeScreenId].playlist.push(newItem);
+    renderPlaylist(screens[activeScreenId].playlist);
+    closeModal();
+  }
+
+  // --- Playlist ---
+  function renderPlaylist(playlist) {
+    const ul = document.getElementById('playlist');
+    if (!ul) return;
+    if (!playlist.length) {
+      ul.innerHTML = '<li class="empty">No content yet. Add from the library above!</li>';
+      return;
+    }
+
+    ul.innerHTML = playlist.map(item => `
+      <li draggable="true" data-id="${item.id}">
+        <span class="drag-handle">⠿</span>
+        ${item.type === 'image'
+          ? `<img class="thumb" src="http://localhost:3000${item.url}" />`
+          : `<div class="thumb-video">▶</div>`}
+        <div class="item-info">
+          <strong>${item.originalName}</strong>
+          <span>${item.type} &bull; ${item.duration}s</span>
+        </div>
+        <button class="btn-danger" onclick="removeFromPlaylist(${item.id})">Remove</button>
+      </li>
+    `).join('');
+
+    ul.querySelectorAll('li[draggable]').forEach(li => {
+      li.addEventListener('dragstart', (e) => {
+        dragSrcId = parseInt(li.dataset.id);
+        li.style.opacity = '0.4';
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      li.addEventListener('dragend', () => {
+        li.style.opacity = '1';
+        ul.querySelectorAll('li').forEach(el => el.classList.remove('drag-over'));
+      });
+      li.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        ul.querySelectorAll('li').forEach(el => el.classList.remove('drag-over'));
+        li.classList.add('drag-over');
+      });
+      li.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const targetId = parseInt(li.dataset.id);
+        if (dragSrcId === targetId) return;
+        const items = [...ul.querySelectorAll('li[data-id]')];
+        const ids = items.map(el => parseInt(el.dataset.id));
+        const srcIndex = ids.indexOf(dragSrcId);
+        const tgtIndex = ids.indexOf(targetId);
+        ids.splice(srcIndex, 1);
+        ids.splice(tgtIndex, 0, dragSrcId);
+        screens[activeScreenId].playlist = ids.map(id => screens[activeScreenId].playlist.find(p => p.id === id)).filter(Boolean);
+        renderPlaylist(screens[activeScreenId].playlist);
+        fetch(`http://localhost:3000/api/screens/${activeScreenId}/playlist/reorder`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order: ids })
+        });
+      });
+    });
+  }
+
+  async function removeFromPlaylist(itemId) {
+    await fetch(`http://localhost:3000/api/screens/${activeScreenId}/playlist/${itemId}`, { method: 'DELETE' });
+    screens[activeScreenId].playlist = screens[activeScreenId].playlist.filter(p => p.id !== itemId);
+    renderPlaylist(screens[activeScreenId].playlist);
+  }
+
+  init();
+</script>
+
+</body>
+</html>
